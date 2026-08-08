@@ -1,0 +1,10 @@
+[workspace]
+members = ["lexinode-backend", "lexinode-cli", "lexinode-core"]
+resolver = "2"
+
+[workspace.package]
+license = "AGPL-3.0"
+repository = "https://github.com/Iota-Wu/lexinode"
+authors = ["Iota Wu <wordless0401@icloud.com>"]
+
+[workspace.dependencies]
