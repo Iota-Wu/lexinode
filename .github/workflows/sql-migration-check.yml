@@ -1,0 +1,50 @@
+name: SQL Migration Check
+
+on:
+  push:
+    paths:
+      - '**/migrations/*.sql'
+      - '.github/workflows/sql-migration-check.yml'
+
+  pull_request: 
+    paths:
+      - '**/migrations/*.sql'
+      - '.github/workflows/sql-migration-check.yml'
+
+jobs:
+  test-migrations:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        
+        env:
+          POSTGRES_USER: test_db
+          POSTGRES_PASSWORD: test_user
+          POSTGRES_DB: test_password
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install sqlx-cli
+        uses: taiki-e/install-action@v2
+        with:
+          tool: sqlx-cli
+
+      - name: Run SQLx Migrations
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/lexinode_test
+        run: |
+          sqlx migrate run --source ./lexinode-core/migrations
