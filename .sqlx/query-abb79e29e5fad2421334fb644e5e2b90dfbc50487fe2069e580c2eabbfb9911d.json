@@ -1,0 +1,98 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, word_id, part_of_speech as \"part_of_speech: PartOfSpeechType\", meaning, embedding as \"embedding: Vector\"\n        FROM definitions\n        WHERE word_id = $1\n        ORDER BY part_of_speech\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "definitions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "word_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "definitions",
+            "name": "word_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "part_of_speech: PartOfSpeechType",
+        "type_info": {
+          "Custom": {
+            "name": "part_of_speech_type",
+            "kind": {
+              "Enum": [
+                "noun",
+                "verb",
+                "adjective",
+                "adverb",
+                "pronoun",
+                "preposition",
+                "conjunction",
+                "interjection",
+                "phrase"
+              ]
+            }
+          }
+        },
+        "origin": {
+          "Table": {
+            "table": "definitions",
+            "name": "part_of_speech"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "meaning",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "definitions",
+            "name": "meaning"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "embedding: Vector",
+        "type_info": {
+          "Custom": {
+            "name": "vector",
+            "kind": "Simple"
+          }
+        },
+        "origin": {
+          "Table": {
+            "table": "definitions",
+            "name": "embedding"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "abb79e29e5fad2421334fb644e5e2b90dfbc50487fe2069e580c2eabbfb9911d"
+}

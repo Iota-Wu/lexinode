@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO morphemes (meaning, type, variations)\n        VALUES ($1, $2, $3)\n        RETURNING id, meaning, type as \"type: MorphemeType\", variations\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "morphemes",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "meaning",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "morphemes",
+            "name": "meaning"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "type: MorphemeType",
+        "type_info": {
+          "Custom": {
+            "name": "morpheme_type",
+            "kind": {
+              "Enum": [
+                "prefix",
+                "root",
+                "suffix"
+              ]
+            }
+          }
+        },
+        "origin": {
+          "Table": {
+            "table": "morphemes",
+            "name": "type"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "variations",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "morphemes",
+            "name": "variations"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        {
+          "Custom": {
+            "name": "morpheme_type",
+            "kind": {
+              "Enum": [
+                "prefix",
+                "root",
+                "suffix"
+              ]
+            }
+          }
+        },
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "29c6f31d52aef8ba8d6e981e5104755fc85eb651f5b2e0ba66b24681fe89c223"
+}

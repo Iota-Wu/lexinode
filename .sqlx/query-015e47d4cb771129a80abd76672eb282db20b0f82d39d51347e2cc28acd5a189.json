@@ -1,0 +1,136 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            id, word_id, source_id, context_snippet,\n            stability, difficulty, reps,\n            last_review_at, due_at, created_at\n        FROM user_items\n        WHERE due_at <= $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "word_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "word_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "source_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "source_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "context_snippet",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "context_snippet"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "stability",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "stability"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "difficulty",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "difficulty"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "reps",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "reps"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "last_review_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "last_review_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "due_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "due_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "015e47d4cb771129a80abd76672eb282db20b0f82d39d51347e2cc28acd5a189"
+}

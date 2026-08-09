@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO word_components (word_id, morpheme_id, position, surface_form)\n        VALUES ($1, $2, $3, $4)\n        RETURNING word_id, morpheme_id, position, surface_form\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "word_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "word_components",
+            "name": "word_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "morpheme_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "word_components",
+            "name": "morpheme_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "position",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "word_components",
+            "name": "position"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "surface_form",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "word_components",
+            "name": "surface_form"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int2",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e68e1767fcc7bd1ccc68fc32d4caaa6b507becd945573ac29f81f0a13338488b"
+}
