@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO sources (title, content_hash, type) VALUES ($1, $2, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "source_type",
+            "kind": {
+              "Enum": [
+                "web",
+                "clipboard"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "080e64b42646e0506fa14cf6ad2b62ed87c83db5d41a5bbc33f870f69d6d8922"
+}

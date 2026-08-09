@@ -1,0 +1,111 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO sources (title, url, content_hash, type)\n        VALUES ($1, $2, $3, $4)\n        RETURNING id, title, url, content_hash, type as \"type: SourceType\", created_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "sources",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sources",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sources",
+            "name": "url"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "content_hash",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "sources",
+            "name": "content_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "type: SourceType",
+        "type_info": {
+          "Custom": {
+            "name": "source_type",
+            "kind": {
+              "Enum": [
+                "web",
+                "clipboard"
+              ]
+            }
+          }
+        },
+        "origin": {
+          "Table": {
+            "table": "sources",
+            "name": "type"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "sources",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "source_type",
+            "kind": {
+              "Enum": [
+                "web",
+                "clipboard"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b4712160a72a96261d47070c253f11d9317d6197fb6a66159b3461d6ba5580ad"
+}

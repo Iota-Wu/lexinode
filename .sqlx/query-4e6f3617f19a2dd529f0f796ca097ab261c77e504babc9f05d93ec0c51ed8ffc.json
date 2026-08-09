@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT source_id FROM user_items WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_items",
+            "name": "source_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "4e6f3617f19a2dd529f0f796ca097ab261c77e504babc9f05d93ec0c51ed8ffc"
+}

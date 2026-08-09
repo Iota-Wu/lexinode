@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO morphemes (meaning, type, variations) VALUES ($1, $2, $3) RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "morphemes",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        {
+          "Custom": {
+            "name": "morpheme_type",
+            "kind": {
+              "Enum": [
+                "prefix",
+                "root",
+                "suffix"
+              ]
+            }
+          }
+        },
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a18f39347eb9e7476241752e38711bde1312cd2ee3d04a1f2faca1115d261be9"
+}
