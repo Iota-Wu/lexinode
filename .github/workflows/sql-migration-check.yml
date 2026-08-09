@@ -1,14 +1,20 @@
-name: SQL Migration Check
+name: SQLx Migration & Offline Metadata Check
 
 on:
   push:
     paths:
       - '**/migrations/*.sql'
+      - '**/src/**/*.rs'
+      - '**/tests/**/*.rs'
+      - '**/.sqlx/**'
       - '.github/workflows/sql-migration-check.yml'
 
   pull_request: 
     paths:
       - '**/migrations/*.sql'
+      - '**/src/**/*.rs'
+      - '**/tests/**/*.rs'
+      - '**/.sqlx/**'
       - '.github/workflows/sql-migration-check.yml'
 
 jobs:
@@ -53,3 +59,9 @@ jobs:
           else
             echo "Migrations directory not found. Skipping migration check."
           fi
+
+      - name: Check .sqlx offline metadata is up to date
+        env:
+          DATABASE_URL: postgres://postgres:password@127.0.0.1:5432/lexinode_test
+        run: |
+          cargo sqlx prepare --workspace --check -- --tests
