@@ -42,7 +42,7 @@ jobs:
 
       - run: cargo clippy --all-targets --all-features -- -D warnings
 
-  test:
+  build:
     needs: [fmt, clippy]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -56,4 +56,52 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - run: cargo test --all-features
+      - run: cargo build --all-features --all-targets
+
+  test:
+    needs: [fmt, clippy]
+    runs-on: ubuntu-latest
+
+    # GitHub Actions `services:` only works on Linux runners, and
+    # `#[sqlx::test]` needs a real DB connection at test *runtime*
+    # (SQLX_OFFLINE only covers compile-time query! type checking).
+    services:
+      postgres:
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: lexinode_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install sqlx-cli
+        uses: taiki-e/install-action@v2
+        with:
+          tool: sqlx-cli
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgres://postgres:password@127.0.0.1:5432/lexinode_test
+        run: |
+          if [ -d "./lexinode-core/migrations" ]; then
+            sqlx migrate run --source ./lexinode-core/migrations
+          fi
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgres://postgres:password@127.0.0.1:5432/lexinode_test
+        run: cargo test --all-features
