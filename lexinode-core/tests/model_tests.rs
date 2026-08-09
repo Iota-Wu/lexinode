@@ -1,7 +1,7 @@
+use chrono::{Duration, Utc};
 use lexinode_core::models::*;
-use sqlx::PgPool;
 use pgvector::Vector;
-use chrono::{Utc, Duration};
+use sqlx::PgPool;
 
 // =====================================================================
 // morphemes
@@ -76,7 +76,12 @@ async fn test_find_morpheme_by_variation(pool: PgPool) -> sqlx::Result<()> {
         "#,
         "walk, move",
         MorphemeType::Root as MorphemeType,
-        &vec!["ced".to_owned(), "ceed".to_owned(), "cede".to_owned(), "cess".to_owned()][..]
+        &vec![
+            "ced".to_owned(),
+            "ceed".to_owned(),
+            "cede".to_owned(),
+            "cess".to_owned()
+        ][..]
     )
     .fetch_one(&pool)
     .await?;
@@ -162,7 +167,10 @@ async fn test_word_spelling_must_be_unique(pool: PgPool) -> sqlx::Result<()> {
     .fetch_one(&pool)
     .await;
 
-    assert!(second_insert.is_err(), "expected unique constraint violation on spelling");
+    assert!(
+        second_insert.is_err(),
+        "expected unique constraint violation on spelling"
+    );
 
     Ok(())
 }
@@ -372,7 +380,10 @@ async fn test_deleting_morpheme_in_use_is_restricted(pool: PgPool) -> sqlx::Resu
         .execute(&pool)
         .await;
 
-    assert!(delete_result.is_err(), "expected RESTRICT to prevent deleting a referenced morpheme");
+    assert!(
+        delete_result.is_err(),
+        "expected RESTRICT to prevent deleting a referenced morpheme"
+    );
 
     Ok(())
 }
@@ -446,7 +457,9 @@ async fn test_create_definition_without_embedding(pool: PgPool) -> sqlx::Result<
 }
 
 #[sqlx::test(migrations = "./migrations")]
-async fn test_word_can_have_multiple_definitions_across_parts_of_speech(pool: PgPool) -> sqlx::Result<()> {
+async fn test_word_can_have_multiple_definitions_across_parts_of_speech(
+    pool: PgPool,
+) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
         "light"
@@ -715,7 +728,10 @@ async fn test_source_content_hash_must_be_unique(pool: PgPool) -> sqlx::Result<(
     .execute(&pool)
     .await;
 
-    assert!(second_insert.is_err(), "expected unique constraint violation on content_hash");
+    assert!(
+        second_insert.is_err(),
+        "expected unique constraint violation on content_hash"
+    );
 
     Ok(())
 }
@@ -973,14 +989,15 @@ async fn test_deleting_source_sets_user_item_source_id_null(pool: PgPool) -> sql
         .execute(&pool)
         .await?;
 
-    let item_source_id: Option<uuid::Uuid> = sqlx::query_scalar!(
-        r#"SELECT source_id FROM user_items WHERE id = $1"#,
-        item_id
-    )
-    .fetch_one(&pool)
-    .await?;
+    let item_source_id: Option<uuid::Uuid> =
+        sqlx::query_scalar!(r#"SELECT source_id FROM user_items WHERE id = $1"#, item_id)
+            .fetch_one(&pool)
+            .await?;
 
-    assert!(item_source_id.is_none(), "expected ON DELETE SET NULL to clear source_id");
+    assert!(
+        item_source_id.is_none(),
+        "expected ON DELETE SET NULL to clear source_id"
+    );
 
     Ok(())
 }
