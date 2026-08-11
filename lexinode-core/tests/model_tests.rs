@@ -1,4 +1,7 @@
+#![allow(clippy::unwrap_used)]
+
 use chrono::{Duration, Utc};
+use float_cmp::approx_eq;
 use lexinode_core::models::*;
 use pgvector::Vector;
 use sqlx::PgPool;
@@ -592,7 +595,7 @@ async fn test_link_synonym_between_definitions(pool: PgPool) -> sqlx::Result<()>
     .fetch_one(&pool)
     .await?;
 
-    assert_eq!(score, 0.92);
+    assert!(approx_eq!(f64, score, 0.92, ulps = 2));
 
     Ok(())
 }
@@ -784,8 +787,8 @@ async fn test_create_user_item_with_default_fsrs_values(pool: PgPool) -> sqlx::R
     .fetch_one(&pool)
     .await?;
 
-    assert_eq!(user_item.stability, 0.0);
-    assert_eq!(user_item.difficulty, 0.0);
+    assert!(approx_eq!(f64, user_item.stability, 0.0, ulps = 2));
+    assert!(approx_eq!(f64, user_item.difficulty, 0.0, ulps = 2));
     assert_eq!(user_item.reps, 0);
     assert!(user_item.last_review_at.is_none());
     assert!(user_item.due_at.is_some());

@@ -16,3 +16,6 @@ uuid = { workspace = true }
 pgvector = { workspace = true }
 chrono = { version = "0.4.45", features = ["serde"] }
 
+[dev-dependencies]
+float-cmp = "0.10.0"
+
