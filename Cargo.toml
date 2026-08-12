@@ -40,3 +40,4 @@ sqlx = { version = "0.9.0", features = [
 ] }
 uuid = { version = "1.24.0", features = ["serde", "v7"] }
 pgvector = { version = "0.4.2", features = ["sqlx", "serde"] }
+thiserror = "2.0.20"

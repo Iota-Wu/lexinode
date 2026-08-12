@@ -10,3 +10,6 @@ authors.workspace = true
 workspace = true
 
 [dependencies]
+thiserror = { workspace = true }
+sqlx = { workspace = true }
+lexinode-core = { path = "../lexinode-core" }
