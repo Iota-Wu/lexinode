@@ -1,5 +1,5 @@
 [package]
-name = "lexinode"
+name = "lexinode-backend"
 version = "0.1.0"
 edition = "2024"
 
@@ -13,3 +13,10 @@ workspace = true
 thiserror = { workspace = true }
 sqlx = { workspace = true }
 lexinode-core = { path = "../lexinode-core" }
+serde = { workspace = true }
+uuid = { workspace = true }
+pgvector = { workspace = true }
+chrono = { version = "0.4.45", features = ["serde"] }
+
+[dev-dependencies]
+float-cmp = "0.10.0"

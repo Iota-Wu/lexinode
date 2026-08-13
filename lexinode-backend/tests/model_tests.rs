@@ -2,7 +2,7 @@
 
 use chrono::{Duration, Utc};
 use float_cmp::approx_eq;
-use lexinode_core::models::*;
+use lexinode_backend::models::*;
 use pgvector::Vector;
 use sqlx::PgPool;
 

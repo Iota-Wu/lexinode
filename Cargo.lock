@@ -680,12 +680,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "lexinode"
+name = "lexinode-backend"
 version = "0.1.0"
 dependencies = [
+ "chrono",
+ "float-cmp",
  "lexinode-core",
+ "pgvector",
+ "serde",
  "sqlx",
  "thiserror",
+ "uuid",
 ]
 
 [[package]]
@@ -696,13 +701,7 @@ version = "0.1.0"
 name = "lexinode-core"
 version = "0.1.0"
 dependencies = [
- "chrono",
- "float-cmp",
- "pgvector",
- "serde",
- "sqlx",
  "thiserror",
- "uuid",
 ]
 
 [[package]]
