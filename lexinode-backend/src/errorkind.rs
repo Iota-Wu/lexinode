@@ -60,6 +60,64 @@ pub enum BackendError {
     Internal(CowStr),
 }
 
+/// Classifies a `sqlx::error::DatabaseError` into a `BackendError` variant.
+///
+/// # Returns
+///
+/// A `BackendError` variant corresponding to the error's type.
+#[allow(dead_code)] // After the backend is finished, the temporary allows will be removed
+fn classify(db_err: Box<dyn sqlx::error::DatabaseError>) -> BackendError {
+    // Classifies the error into a `Kind` variant and maps it to a `BackendError` variant.
+    enum Kind {
+        UniqueViolation,
+        CheckViolation,
+        ForeignKeyViolation,
+        InsufficientPrivileges,
+        Other,
+    }
+
+    impl Kind {
+        fn classify(err: &dyn sqlx::error::DatabaseError) -> Self {
+            if err.is_check_violation() {
+                return Self::CheckViolation;
+            }
+            if err.is_unique_violation() {
+                return Self::UniqueViolation;
+            }
+            if err.is_foreign_key_violation() {
+                return Self::ForeignKeyViolation;
+            }
+            // PostgreSQL: insufficient_privilege
+            if err.code().as_deref() == Some("42501") {
+                return Self::InsufficientPrivileges;
+            }
+            Self::Other
+        }
+    }
+
+    match Kind::classify(db_err.as_ref()) {
+        Kind::CheckViolation => BackendError::Validation {
+            field: db_err
+                .constraint()
+                .unwrap_or("check violation")
+                .to_owned()
+                .into(),
+            message: db_err.message().to_owned().into(),
+        },
+        Kind::UniqueViolation => BackendError::Conflict(db_err.message().to_owned().into()),
+        Kind::ForeignKeyViolation => BackendError::Validation {
+            field: db_err
+                .constraint()
+                .unwrap_or("foreign key violation")
+                .to_owned()
+                .into(),
+            message: format!("Referenced entity does not exist: {}", db_err.message()).into(),
+        },
+        Kind::InsufficientPrivileges => BackendError::Forbidden(db_err.message().to_owned().into()),
+        Kind::Other => BackendError::Database(sqlx::Error::Database(db_err)),
+    }
+}
+
 impl From<sqlx::Error> for BackendError {
     /// Maps low-level [`sqlx::Error`] variants into higher-level domain errors where appropriate.
     ///
@@ -69,38 +127,7 @@ impl From<sqlx::Error> for BackendError {
     fn from(err: sqlx::Error) -> Self {
         match err {
             // Map unique violation to Conflict
-            sqlx::Error::Database(db_err) => {
-                match () {
-                    () if db_err.is_unique_violation() => 
-                        Self::Conflict(db_err.message().to_owned().into()),
-                    
-                    () if db_err.is_check_violation() => 
-                        Self::Validation {
-                            field: db_err
-                                .constraint()
-                                .unwrap_or("check_constraint")
-                                .to_owned()
-                                .into(),
-                            message: db_err.message().to_owned().into(),
-                        },
-                    
-                    () if db_err.is_foreign_key_violation() => 
-                        Self::Validation {
-                            field: db_err
-                                .constraint()
-                                .unwrap_or("foreign_key")
-                                .to_owned()
-                                .into(),
-                            message: "Referenced entity does not exist".into(),
-                        },
-                    
-                    () if db_err.code().as_deref() == Some("42501") => 
-                        Self::Forbidden(db_err.to_string().into()),
-                    () => 
-                        Self::Database(sqlx::Error::Database(db_err)),
-                }
-            }
-
+            sqlx::Error::Database(db_err) => classify(db_err),
             // Map pool timeout or worker crash to internal error
             sqlx::Error::PoolTimedOut => Self::Internal(
                 "Database connection pool exhausted. Consider increasing MAX_CONNECTIONS in your config".into()
