@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, panic::Location};
 
 /// Type alias for `Result<T, Box<ErrorContext<E>>>`.
 ///
@@ -26,6 +26,8 @@ pub struct ErrorContext<E> {
     pub source: E,
     /// Optional structured/unstructured metadata providing deeper diagnostic context.
     pub details: Option<CowStr>,
+    /// The location in the code where this error was created.
+    pub location: &'static Location<'static>,
 }
 
 impl<E: std::fmt::Display> std::fmt::Display for ErrorContext<E> {
@@ -52,11 +54,15 @@ impl<E: std::error::Error + 'static> std::error::Error for ErrorContext<E> {
 /// `Box<ErrorContext<E>>` without requiring an explicit `.context(...)` call.
 /// The resulting `ErrorContext` has `op: None`.
 impl<E> From<E> for Box<ErrorContext<E>> {
+    #[track_caller]
     fn from(err: E) -> Self {
+        let location = Location::caller();
+
         Box::new(ErrorContext {
             op: None,
             source: err,
             details: None,
+            location,
         })
     }
 }
@@ -65,12 +71,57 @@ impl<E> From<E> for Box<ErrorContext<E>> {
 ///
 /// Allows chaining context onto any `Result<T, F>` where `F` can be converted into
 /// the target domain error type `E` (including the trivial case `F == E`).
+///
+/// # When to use `.context()` vs a bare `?`
+///
+/// Because `#[track_caller]` cannot see through an intermediate `From` conversion
+/// (a limitation of Rust's orphan rules, not of this crate), only two call sites
+/// ever produce a meaningful [`ErrorContext::location`]:
+///
+/// 1. A bare `?` on a `Result` whose error type converts directly into
+///    `Box<ErrorContext<E>>` — the location points at the `?` itself.
+/// 2. A direct call to `.context(...)` / `.with_context(...)` — the location
+///    points at that call.
+///
+/// **Guideline: reserve `.context(...)` for the call site closest to where the
+/// error actually escapes to the caller — not at every intermediate hop.**
+///
+/// - If a function is a thin wrapper that does one fallible operation and
+///   propagates its `Result` directly (no branching, no combining multiple
+///   fallible calls), prefer a bare `?` and let the *caller* attach `.context(...)`
+///   if/when it matters. Adding `.context()` inside a one-liner just relocates
+///   the location to a spot with no more information than the bare `?` would
+///   have given the caller, while adding an extra allocation and an extra layer
+///   to unwrap when reading the error.
+/// - If a function performs several fallible steps, or the error needs a
+///   human-readable description of *what this function was trying to do*
+///   (information the caller cannot infer from the error type alone), attach
+///   `.context("...")` at that step so the location and the description both
+///   point at the operation that actually failed.
+/// - Never stack `.context(...)` on every layer of a call chain "just in case" —
+///   each call allocates and wraps, and only the *last* one you add determines
+///   the recorded location, so earlier ones add cost without adding signal.
+///
+/// ```ignore
+/// // Prefer: thin wrapper, let the caller decide whether to annotate.
+/// fn fetch_row(pool: &Pool) -> Result<Row> {
+///     Ok(sqlx::query(..).fetch_one(pool).await?)
+/// }
+///
+/// // Prefer: multi-step function, context pinpoints which step failed.
+/// fn sync_user(pool: &Pool, id: UserId) -> Result<()> {
+///     let user = fetch_user(pool, id).context("fetch user before sync")?;
+///     push_to_search_index(&user).context("push user to search index")?;
+///     Ok(())
+/// }
+/// ```
 pub trait ResultExt<T, E> {
     /// Wraps an error with an operation name.
     ///
     /// # Arguments
     ///
     /// * `op` - High-level description of the operation being attempted.
+    #[track_caller]
     fn context(self, op: impl Into<CowStr>) -> Result<T, E>;
 
     /// Wraps an error with an operation name and lazily computed extra details.
@@ -79,6 +130,7 @@ pub trait ResultExt<T, E> {
     ///
     /// * `op` - High-level description of the operation being attempted.
     /// * `details_fn` - Closure returning extra contextual information, evaluated only on failure.
+    #[track_caller]
     fn with_context<S: Into<CowStr>>(
         self,
         op: impl Into<CowStr>,
@@ -90,26 +142,34 @@ impl<T, E, F> ResultExt<T, E> for std::result::Result<T, F>
 where
     F: Into<E>,
 {
+    #[track_caller]
     fn context(self, op: impl Into<CowStr>) -> Result<T, E> {
+        let location = Location::caller();
+
         self.map_err(|err| {
             Box::new(ErrorContext {
                 op: Some(op.into()),
                 source: err.into(),
                 details: None,
+                location,
             })
         })
     }
 
+    #[track_caller]
     fn with_context<S: Into<CowStr>>(
         self,
         op: impl Into<CowStr>,
         details_fn: impl FnOnce() -> S,
     ) -> Result<T, E> {
+        let location = Location::caller();
+
         self.map_err(|err| {
             Box::new(ErrorContext {
                 op: Some(op.into()),
                 source: err.into(),
                 details: Some(details_fn().into()),
+                location,
             })
         })
     }
@@ -159,6 +219,7 @@ mod tests {
             op: Some("test op".into()),
             source: TestError,
             details: None,
+            location: Location::caller(),
         };
 
         assert_eq!(ctx.to_string(), "Failed to test op: test error");
@@ -170,6 +231,7 @@ mod tests {
             op: None,
             source: TestError,
             details: None,
+            location: Location::caller(),
         };
 
         assert_eq!(ctx.to_string(), "test error");
@@ -181,6 +243,7 @@ mod tests {
             op: Some("test op".into()),
             source: TestError,
             details: Some("test details".into()),
+            location: Location::caller(),
         };
 
         assert_eq!(
@@ -197,6 +260,7 @@ mod tests {
             op: Some("test op".into()),
             source: TestError,
             details: None,
+            location: Location::caller(),
         };
 
         // Verify std::error::Error::source properly returns the underlying domain error
@@ -307,6 +371,25 @@ mod tests {
         let err = mock_direct_question_mark().unwrap_err();
         assert!(err.op.is_none());
         assert_matches!(err.source, TestResourceError { .. });
+    }
+
+    #[test]
+    fn test_error_context_captures_caller_location() {
+        use std::path::Path;
+
+        let current_file = file!();
+        let current_line = line!() + 1;
+        let res: Result<&'static str, TestError> = mock_op_failure().context("test op");
+
+        let err_ctx = res.unwrap_err();
+
+        assert_eq!(err_ctx.location.file(), current_file);
+        assert_eq!(err_ctx.location.line(), current_line);
+
+        let extension = Path::new(err_ctx.location.file())
+            .extension()
+            .expect("Expected file extension");
+        assert_eq!(extension, "rs");
     }
 
     // =====================================================================
