@@ -2,7 +2,7 @@
 
 use chrono::{Duration, Utc};
 use float_cmp::approx_eq;
-use lexinode_core::models::*;
+use lexinode_backend::models::*;
 use pgvector::Vector;
 use sqlx::PgPool;
 
@@ -10,7 +10,7 @@ use sqlx::PgPool;
 // morphemes
 // =====================================================================
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_morpheme(pool: PgPool) -> sqlx::Result<()> {
     let morpheme = sqlx::query_as!(
         Morpheme,
@@ -33,7 +33,7 @@ async fn test_create_morpheme(pool: PgPool) -> sqlx::Result<()> {
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_morpheme_prefix_and_suffix_types(pool: PgPool) -> sqlx::Result<()> {
     let prefix = sqlx::query_as!(
         Morpheme,
@@ -68,7 +68,7 @@ async fn test_create_morpheme_prefix_and_suffix_types(pool: PgPool) -> sqlx::Res
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_find_morpheme_by_variation(pool: PgPool) -> sqlx::Result<()> {
     sqlx::query_as!(
         Morpheme,
@@ -112,7 +112,7 @@ async fn test_find_morpheme_by_variation(pool: PgPool) -> sqlx::Result<()> {
 // words
 // =====================================================================
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_word(pool: PgPool) -> sqlx::Result<()> {
     let word = sqlx::query_as!(
         Word,
@@ -133,7 +133,7 @@ async fn test_create_word(pool: PgPool) -> sqlx::Result<()> {
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_word_without_phonetic(pool: PgPool) -> sqlx::Result<()> {
     let word = sqlx::query_as!(
         Word,
@@ -154,7 +154,7 @@ async fn test_create_word_without_phonetic(pool: PgPool) -> sqlx::Result<()> {
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_word_spelling_must_be_unique(pool: PgPool) -> sqlx::Result<()> {
     sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -182,7 +182,7 @@ async fn test_word_spelling_must_be_unique(pool: PgPool) -> sqlx::Result<()> {
 // word_components
 // =====================================================================
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_link_word_to_morpheme_component(pool: PgPool) -> sqlx::Result<()> {
     let morpheme = sqlx::query_as!(
         Morpheme,
@@ -233,7 +233,7 @@ async fn test_link_word_to_morpheme_component(pool: PgPool) -> sqlx::Result<()> 
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_word_with_multiple_morpheme_components_in_order(pool: PgPool) -> sqlx::Result<()> {
     let prefix = sqlx::query_scalar!(
         r#"INSERT INTO morphemes (meaning, type, variations) VALUES ($1, $2, $3) RETURNING id"#,
@@ -306,7 +306,7 @@ async fn test_word_with_multiple_morpheme_components_in_order(pool: PgPool) -> s
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_deleting_word_cascades_to_word_components(pool: PgPool) -> sqlx::Result<()> {
     let morpheme_id = sqlx::query_scalar!(
         r#"INSERT INTO morphemes (meaning, type, variations) VALUES ($1, $2, $3) RETURNING id"#,
@@ -350,7 +350,7 @@ async fn test_deleting_word_cascades_to_word_components(pool: PgPool) -> sqlx::R
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_deleting_morpheme_in_use_is_restricted(pool: PgPool) -> sqlx::Result<()> {
     let morpheme_id = sqlx::query_scalar!(
         r#"INSERT INTO morphemes (meaning, type, variations) VALUES ($1, $2, $3) RETURNING id"#,
@@ -395,7 +395,7 @@ async fn test_deleting_morpheme_in_use_is_restricted(pool: PgPool) -> sqlx::Resu
 // definitions / vector embeddings
 // =====================================================================
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_definition_with_vector_embedding(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -430,7 +430,7 @@ async fn test_create_definition_with_vector_embedding(pool: PgPool) -> sqlx::Res
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_definition_without_embedding(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -459,7 +459,7 @@ async fn test_create_definition_without_embedding(pool: PgPool) -> sqlx::Result<
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_word_can_have_multiple_definitions_across_parts_of_speech(
     pool: PgPool,
 ) -> sqlx::Result<()> {
@@ -506,7 +506,7 @@ async fn test_word_can_have_multiple_definitions_across_parts_of_speech(
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_deleting_word_cascades_to_definitions(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -544,7 +544,7 @@ async fn test_deleting_word_cascades_to_definitions(pool: PgPool) -> sqlx::Resul
 // synonyms
 // =====================================================================
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_link_synonym_between_definitions(pool: PgPool) -> sqlx::Result<()> {
     let word_a = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -600,7 +600,7 @@ async fn test_link_synonym_between_definitions(pool: PgPool) -> sqlx::Result<()>
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_deleting_definition_cascades_to_synonyms(pool: PgPool) -> sqlx::Result<()> {
     let word_a = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -663,7 +663,7 @@ async fn test_deleting_definition_cascades_to_synonyms(pool: PgPool) -> sqlx::Re
 // sources
 // =====================================================================
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_source(pool: PgPool) -> sqlx::Result<()> {
     let source = sqlx::query_as!(
         Source,
@@ -686,7 +686,7 @@ async fn test_create_source(pool: PgPool) -> sqlx::Result<()> {
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_clipboard_source_without_url(pool: PgPool) -> sqlx::Result<()> {
     let source = sqlx::query_as!(
         Source,
@@ -709,7 +709,7 @@ async fn test_create_clipboard_source_without_url(pool: PgPool) -> sqlx::Result<
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_source_content_hash_must_be_unique(pool: PgPool) -> sqlx::Result<()> {
     let hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
@@ -743,7 +743,7 @@ async fn test_source_content_hash_must_be_unique(pool: PgPool) -> sqlx::Result<(
 // user_items / FSRS metrics
 // =====================================================================
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_user_item_with_default_fsrs_values(pool: PgPool) -> sqlx::Result<()> {
     let source = sqlx::query_as!(
         Source,
@@ -796,7 +796,7 @@ async fn test_create_user_item_with_default_fsrs_values(pool: PgPool) -> sqlx::R
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_create_user_item_without_due_date(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -829,7 +829,7 @@ async fn test_create_user_item_without_due_date(pool: PgPool) -> sqlx::Result<()
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_query_overdue_user_items_excludes_not_yet_due(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -879,7 +879,7 @@ async fn test_query_overdue_user_items_excludes_not_yet_due(pool: PgPool) -> sql
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_query_overdue_user_items_includes_exact_boundary(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -921,7 +921,7 @@ async fn test_query_overdue_user_items_includes_exact_boundary(pool: PgPool) -> 
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_query_overdue_user_items_excludes_null_due_at(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,
@@ -961,7 +961,7 @@ async fn test_query_overdue_user_items_excludes_null_due_at(pool: PgPool) -> sql
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_deleting_source_sets_user_item_source_id_null(pool: PgPool) -> sqlx::Result<()> {
     let source_id = sqlx::query_scalar!(
         r#"INSERT INTO sources (title, content_hash, type) VALUES ($1, $2, $3) RETURNING id"#,
@@ -1005,7 +1005,7 @@ async fn test_deleting_source_sets_user_item_source_id_null(pool: PgPool) -> sql
     Ok(())
 }
 
-#[sqlx::test(migrations = "./migrations")]
+#[sqlx::test(migrations = "../migrations")]
 async fn test_deleting_word_cascades_to_user_items(pool: PgPool) -> sqlx::Result<()> {
     let word_id = sqlx::query_scalar!(
         r#"INSERT INTO words (spelling) VALUES ($1) RETURNING id"#,

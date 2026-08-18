@@ -318,6 +318,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26b73573e6edcd2af0cdf47bd6cb58f0b3839491263c314eaad1ccf24430e1de"
 
 [[package]]
+name = "float-cmp"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b09cf3155332e944990140d967ff5eceb70df778b34f77d8075db46e4704e6d8"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "flume"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -671,8 +680,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "lexinode"
+name = "lexinode-backend"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "float-cmp",
+ "lexinode-core",
+ "pgvector",
+ "serde",
+ "sqlx",
+ "thiserror",
+ "uuid",
+]
 
 [[package]]
 name = "lexinode-cli"
@@ -682,11 +701,7 @@ version = "0.1.0"
 name = "lexinode-core"
 version = "0.1.0"
 dependencies = [
- "chrono",
- "pgvector",
- "serde",
- "sqlx",
- "uuid",
+ "thiserror",
 ]
 
 [[package]]

@@ -54,8 +54,8 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:password@127.0.0.1:5432/lexinode_test
         run: |
-          if [ -d "./lexinode-core/migrations" ]; then
-            sqlx migrate run --source ./lexinode-core/migrations
+          if [ -d "./migrations" ]; then
+            sqlx migrate run --source ./migrations
           else
             echo "Migrations directory not found. Skipping migration check."
           fi
